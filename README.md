@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pak Library MCQs - Free for PPSC, FPSC, Librarian Tests</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    body { font-family: system-ui; }
+    .quiz-option:hover { background-color: #e0f2fe; }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+  <!-- Navbar -->
+  <nav class="bg-blue-700 text-white py-4 sticky top-0 shadow">
+    <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-book text-3xl"></i>
+        <h1 class="text-2xl font-bold">Pak Library MCQs</h1>
+      </div>
+      <a href="#" onclick="showHome()" class="hover:underline">Home</a>
+    </div>
+  </nav>
+
+  <!-- Home Page -->
+  <div id="home" class="max-w-6xl mx-auto px-4 py-8">
+    <div class="text-center mb-10">
+      <h1 class="text-5xl font-bold text-blue-800">Library & Information Science MCQs</h1>
+      <p class="text-xl text-gray-600 mt-3">For PPSC • FPSC • Lecturer • Assistant Librarian Tests</p>
+      <button onclick="startRandomQuiz()" class="mt-6 bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-xl text-lg font-semibold">
+        <i class="fa-solid fa-play mr-2"></i> Start Random Quiz Now
+      </button>
+    </div>
+
+    <h2 class="text-2xl font-semibold mb-6 text-center">Choose Category</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="categories">
+      <!-- Categories will be added by JS -->
+    </div>
+  </div>
+
+  <!-- Quiz Page -->
+  <div id="quiz" class="max-w-4xl mx-auto px-4 py-8 hidden">
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+      <div class="flex justify-between mb-6">
+        <h2 id="category-title" class="text-2xl font-bold text-blue-700"></h2>
+        <div class="text-right">
+          <span id="timer" class="bg-red-100 text-red-700 px-4 py-1 rounded-full font-mono">Time: 00:00</span>
+          <span id="score" class="ml-4 text-lg font-semibold">Score: 0/0</span>
+        </div>
+      </div>
+
+      <div id="question-text" class="text-2xl font-medium mb-8"></div>
+      
+      <div id="options" class="space-y-4"></div>
+
+      <div class="flex justify-between mt-10">
+        <button onclick="previousQuestion()" id="prev-btn" class="hidden px-6 py-3 bg-gray-300 hover:bg-gray-400 rounded-xl font-medium">← Previous</button>
+        <button onclick="nextQuestion()" id="next-btn" class="px-8 py-3 bg-blue-700 text-white hover:bg-blue-800 rounded-xl font-medium">Next →</button>
+      </div>
+
+      <div id="result" class="hidden mt-8 p-6 bg-green-50 rounded-xl border border-green-200">
+        <h3 class="text-xl font-bold mb-4">Your Score: <span id="final-score" class="text-green-700"></span></h3>
+        <button onclick="restartQuiz()" class="bg-blue-700 text-white px-8 py-3 rounded-xl">Try Again</button>
+        <button onclick="showHome()" class="ml-4 bg-gray-600 text-white px-8 py-3 rounded-xl">Back to Home</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====================== REAL MCQs (you can add more here) ======================
+    const questionsDB = {
+      "Classification": [
+        { q: "Who devised the Dewey Decimal Classification (DDC) system?", options: ["S.R. Ranganathan", "Melvil Dewey", "H.E. Bliss", "J.D. Brown"], ans: 1, expl: "Melvil Dewey developed DDC in 1876." },
+        { q: "Colon Classification was developed by:", options: ["Melvil Dewey", "S.R. Ranganathan", "C.A. Cutter", "Ranganathan"], ans: 1, expl: "Dr. S.R. Ranganathan created Colon Classification in 1933." },
+        { q: "DDC is now maintained by:", options: ["ALA", "OCLC", "IFLA", "UNESCO"], ans: 1, expl: "Online Computer Library Center (OCLC) owns and maintains DDC." },
+        { q: "UDC stands for:", options: ["Universal Decimal Classification", "United Decimal Code", "Universal Dewey Code", "None"], ans: 0, expl: "Universal Decimal Classification is used in many countries." },
+        { q: "Phoenix schedules are part of which classification scheme?", options: ["UDC", "DDC", "Colon Classification", "LCC"], ans: 1, expl: "Phoenix schedules are revisions in Dewey Decimal Classification." }
+      ],
+      "Cataloguing": [
+        { q: "RDA stands for:", options: ["Resource Description and Access", "Reference Data Access", "Revised Dewey Access", "None"], ans: 0, expl: "RDA is the new international cataloguing standard that replaced AACR2." },
+        { q: "AACR2 is:", options: ["Anglo-American Cataloguing Rules 2nd edition", "American Cataloguing Code", "Automated Cataloguing Rules", "None"], ans: 0, expl: "Widely used descriptive cataloguing code." },
+        { q: "MARC stands for:", options: ["Machine Readable Cataloging", "Manual Archive Record Code", "Modern Access Record", "None"], ans: 0, expl: "Format for machine-readable bibliographic records." },
+        { q: "Standard size of catalogue card is:", options: ["12.5 cm × 7.5 cm", "10 cm × 5 cm", "15 cm × 10 cm", "8 cm × 5 cm"], ans: 0, expl: "International standard catalogue card size." },
+        { q: "Which section of AACR2 deals with serial publications?", options: ["Part A", "Part B", "Part C", "None"], ans: 1, expl: "Part B deals with serials in AACR2." }
+      ],
+      "Library Management": [
+        { q: "What is the primary function of a library catalog?", options: ["Lend books", "List and describe the collection", "Organize events", "Maintain accounts"], ans: 1, expl: "To provide access to the library's collection." },
+        { q: "Zero-based budgeting is used for:", options: ["Library acquisition", "Staff salary", "Building maintenance", "None"], ans: 0, expl: "Common in library financial planning." },
+        { q: "Maslow’s theory is related to:", options: ["Motivation", "Classification", "Cataloguing", "None"], ans: 0, expl: "Theory of human needs used in library management." },
+        { q: "How many public libraries are approximately in Pakistan?", options: ["200", "500", "1000", "More than 2000"], ans: 0, expl: "According to past PPSC papers." },
+        { q: "Citation indexing is a service of:", options: ["Web of Science", "Library classification", "OPAC", "None"], ans: 0, expl: "Used for research impact." }
+      ],
+      "Information Sources": [
+        { q: "Gazetteers are used for:", options: ["Geographical information", "Biographies", "Statistics", "None"], ans: 0, expl: "Geographical dictionaries." },
+        { q: "BIOS stands for:", options: ["Basic Input Output System", "Basic Information Output", "None"], ans: 0, expl: "Computer term often asked in librarian tests." },
+        { q: "OPAC stands for:", options: ["Online Public Access Catalogue", "Offline Public Access", "None"], ans: 0, expl: "Digital library catalogue." },
+        { q: "Who is called the Father of Library Science in India?", options: ["Melvil Dewey", "S.R. Ranganathan", "C.A. Cutter", "None"], ans: 1, expl: "Dr. S.R. Ranganathan (Five Laws of Library Science)." },
+        { q: "The oldest library of Pakistan is:", options: ["Punjab Library", "Quaid-e-Azam Library", "National Library", "None"], ans: 0, expl: "Punjab Library (Lahore)." }
+      ]
+    };
+
+    let currentCategory = "";
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let timerInterval;
+    let timeLeft = 600; // 10 minutes per quiz
+
+    function showHome() {
+      document.getElementById("home").classList.remove("hidden");
+      document.getElementById("quiz").classList.add("hidden");
+      clearInterval(timerInterval);
+    }
+
+    function renderCategories() {
+      const container = document.getElementById("categories");
+      container.innerHTML = "";
+      Object.keys(questionsDB).forEach(cat => {
+        const div = document.createElement("div");
+        div.className = "bg-white border border-blue-200 rounded-2xl p-6 hover:shadow-xl cursor-pointer transition";
+        div.innerHTML = `
+          <h3 class="text-xl font-semibold text-blue-700">${cat}</h3>
+          <p class="text-sm text-gray-500 mt-1">${questionsDB[cat].length} Questions</p>
+        `;
+        div.onclick = () => startQuiz(cat);
+        container.appendChild(div);
+      });
+    }
+
+    function startQuiz(category) {
+      currentCategory = category;
+      currentQuestions = [...questionsDB[category]];
+      currentIndex = 0;
+      score = 0;
+      timeLeft = 600;
+
+      document.getElementById("home").classList.add("hidden");
+      document.getElementById("quiz").classList.remove("hidden");
+      document.getElementById("category-title").textContent = category;
+      document.getElementById("result").classList.add("hidden");
+      
+      startTimer();
+      showQuestion();
+    }
+
+    function startRandomQuiz() {
+      const cats = Object.keys(questionsDB);
+      const randomCat = cats[Math.floor(Math.random() * cats.length)];
+      startQuiz(randomCat);
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        const min = Math.floor(timeLeft / 60);
+        const sec = timeLeft % 60;
+        document.getElementById("timer").textContent = `Time: \( {min}: \){sec < 10 ? '0' : ''}${sec}`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          finishQuiz();
+        }
+      }, 1000);
+    }
+
+    function showQuestion() {
+      const q = currentQuestions[currentIndex];
+      document.getElementById("question-text").innerHTML = `<span class="text-blue-600">Q${currentIndex + 1}.</span> ${q.q}`;
+      
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+      
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.className = "quiz-option w-full text-left px-6 py-4 border border-gray-300 rounded-2xl hover:bg-blue-50 text-lg transition";
+        btn.innerHTML = `<span class="font-semibold">${String.fromCharCode(65 + i)}.</span> ${opt}`;
+        btn.onclick = () => selectAnswer(i, btn, q.ans);
+        optionsDiv.appendChild(btn);
+      });
+
+      document.getElementById("prev-btn").classList.toggle("hidden", currentIndex === 0);
+      document.getElementById("next-btn").textContent = currentIndex === currentQuestions.length - 1 ? "Finish Quiz" : "Next →";
+    }
+
+    function selectAnswer(selected, btn, correct) {
+      // Disable all buttons
+      const allBtns = document.querySelectorAll("#options button");
+      allBtns.forEach(b => b.disabled = true);
+      
+      if (selected === correct) {
+        btn.classList.add("bg-green-100", "border-green-500");
+        score++;
+      } else {
+        btn.classList.add("bg-red-100", "border-red-500");
+        // Show correct answer
+        allBtns[correct].classList.add("bg-green-100", "border-green-500");
+      }
+      
+      document.getElementById("score").innerHTML = `Score: <span class="text-green-600">\( {score}</span>/ \){currentIndex + 1}`;
+    }
+
+    function nextQuestion() {
+      currentIndex++;
+      if (currentIndex < currentQuestions.length) {
+        showQuestion();
+      } else {
+        finishQuiz();
+      }
+    }
+
+    function previousQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        showQuestion();
+      }
+    }
+
+    function finishQuiz() {
+      clearInterval(timerInterval);
+      document.getElementById("result").classList.remove("hidden");
+      document.getElementById("options").innerHTML = "";
+      document.getElementById("question-text").innerHTML = "";
+      document.getElementById("final-score").innerHTML = `${score} out of \( {currentQuestions.length} <span class="text-sm font-normal">( \){Math.round(score/currentQuestions.length*100)}%)</span>`;
+    }
+
+    function restartQuiz() {
+      startQuiz(currentCategory);
+    }
+
+    // Initialize
+    window.onload = function() {
+      renderCategories();
+    };
+  </script>
+</body>
+</html>
